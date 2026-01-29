@@ -27,7 +27,16 @@
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             transition: all 0.2s;
             min-width: 2.2rem;
-            scroll-margin-top: 200px; /* 增加空間，避免被置頂元素遮擋 */
+            scroll-margin-top: 200px;
+            cursor: pointer; /* 提示可點擊 */
+            user-select: none; /* 防止手機長按選取文字 */
+            position: relative;
+        }
+
+        /* 點擊時的反饋效果 */
+        .word-card:active {
+            background-color: #eff6ff;
+            transform: scale(0.95);
         }
 
         /* 標題樣式特別處理 */
@@ -76,9 +85,7 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* 當面板有 .collapsed 類別時 */
         aside.collapsed #settings-container {
-            /* 使用 max-height 搭配 opacity 做滑動效果，比 display:none 滑順 */
             max-height: 0;
             opacity: 0;
             padding-top: 0;
@@ -90,14 +97,13 @@
             transform: rotate(180deg);
         }
 
-        /* 確保底部按鈕區在折疊時依然可見且美觀 */
         aside.collapsed {
             border-top-left-radius: 1.5rem;
             border-top-right-radius: 1.5rem;
         }
 
         #settings-container {
-            max-height: 50vh; /* 展開時的最大高度 */
+            max-height: 50vh;
             opacity: 1;
             transition: all 0.3s ease;
         }
@@ -113,19 +119,22 @@
                     從「混日子」到<br>「神眼中的唯一」<br>
                     <span class="text-base md:text-xl text-blue-600 block mt-2">—— 一位職場青年的生命翻轉</span>
                 </h1>
+                <p class="text-xs text-gray-400 mt-2 bg-blue-50 inline-block px-3 py-1 rounded-full border border-blue-100">
+                    💡 點擊任何一個詞卡，即可從該處開始朗讀
+                </p>
             </div>
             
-            <!-- 增加底部 padding，確保最後一段不被浮動按鈕遮擋 -->
-            <div id="article-container" class="space-y-6 pb-64 md:pb-32">
+            <div id="article-container" class="space-y-6 pb-64 md:pb-32 min-h-[300px]">
                 <!-- 內容將由 JavaScript 動態生成 -->
+                <div class="text-center text-gray-400 mt-10">載入文章中...</div>
             </div>
         </div>
     </main>
 
-    <!-- 右側：控制面板 (手機版在底部) -->
+    <!-- 右側：控制面板 -->
     <aside id="control-panel" class="w-full md:w-80 bg-white border-t md:border-t-0 md:border-l border-gray-200 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] z-20 flex flex-col fixed bottom-0 md:relative md:bottom-auto">
         
-        <!-- 1. 標題區 (點擊可折疊/展開) -->
+        <!-- 標題區 -->
         <div id="control-header" onclick="togglePanel()" class="p-4 bg-blue-600 text-white cursor-pointer flex justify-between items-center md:cursor-default select-none active:bg-blue-700 transition-colors">
             <h2 class="text-lg font-bold flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -133,13 +142,12 @@
                 </svg>
                 語音控制
             </h2>
-            <!-- 折疊箭頭指示器 -->
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 chevron transition-transform duration-300 md:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
         </div>
 
-        <!-- 2. 設定區 (可折疊) -->
+        <!-- 設定區 -->
         <div id="settings-container" class="flex-1 p-4 overflow-y-auto space-y-5 bg-white">
              <!-- 聲音選擇 -->
              <div class="space-y-2">
@@ -158,7 +166,6 @@
                 <input type="range" id="rate" min="0.5" max="1.5" value="1" step="0.1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
             </div>
 
-            <!-- 開關高亮 -->
             <div class="flex items-center justify-between">
                 <label class="text-sm font-medium text-gray-700">自動捲動跟隨</label>
                 <input type="checkbox" id="autoScroll" checked class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
@@ -166,20 +173,19 @@
 
             <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3">
                 <p class="text-xs text-yellow-800">
-                    * 若無聲音，請確認手機未處於靜音模式，並調大「媒體音量」。
+                    * 點擊文章單字即可從該處播放。<br>
+                    * 若手機仍講廣東話，請在清單中選取帶有 (zh-CN) 的聲音。
                 </p>
             </div>
         </div>
 
-        <!-- 3. 按鈕區 (始終顯示) -->
+        <!-- 按鈕區 -->
         <div class="p-4 bg-gray-50 border-t border-gray-100 pb-safe md:pb-4">
-            <!-- 播放/停止 切換 -->
             <button id="main-action-btn" onclick="togglePlay()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition font-bold shadow-lg text-lg">
-                <!-- 圖示與文字將由 JS 控制 -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
                 </svg>
-                <span>開始朗讀</span>
+                <span>從頭開始朗讀</span>
             </button>
         </div>
     </aside>
@@ -456,56 +462,77 @@
             ]
         ];
 
-        // --- 2. 渲染邏輯 ---
+        // --- 2. 資料結構扁平化 & 渲染邏輯 ---
+        let flatWordList = [];
         let wordIdCounter = 0; 
-        const textMapping = []; 
 
         function renderArticle() {
-            const container = document.getElementById('article-container');
-            container.innerHTML = '';
-            wordIdCounter = 0;
-            
-            articleData.forEach((paragraph, pIndex) => {
-                const pDiv = document.createElement('div');
-                pDiv.className = 'flex flex-wrap gap-2 items-end'; 
+            try {
+                const container = document.getElementById('article-container');
+                container.innerHTML = '';
+                wordIdCounter = 0;
+                flatWordList = []; // 重置列表
                 
-                const isTitle = paragraph.some(w => w.type === 'title');
-                if (isTitle) {
-                    pDiv.className += ' mb-4 mt-6 border-b-2 border-blue-100 pb-2 is-title justify-center';
-                }
-
-                paragraph.forEach((word) => {
-                    const card = document.createElement('div');
-                    const currentId = `word-${wordIdCounter}`;
-                    card.id = currentId;
+                articleData.forEach((paragraph, pIndex) => {
+                    const pDiv = document.createElement('div');
+                    pDiv.className = 'flex flex-wrap gap-2 items-end'; 
                     
-                    const len = word.h.length;
-                    for(let i=0; i<len; i++) {
-                        textMapping.push(currentId);
+                    const isTitle = paragraph.some(w => w.type === 'title');
+                    if (isTitle) {
+                        pDiv.className += ' mb-4 mt-6 border-b-2 border-blue-100 pb-2 is-title justify-center';
                     }
-                    wordIdCounter++;
 
-                    if (word.type === 'punct') {
-                        card.className = 'word-card punctuation';
-                        card.innerHTML = `<span class="hanzi">${word.h}</span>`;
-                    } else if (word.type === 'title') {
-                        card.className = 'word-card';
-                        card.innerHTML = `
-                            <span class="hanzi">${word.h}</span>
-                            <span class="pinyin">${word.p}</span>
-                        `;
-                    } else {
-                        card.className = 'word-card';
-                        card.innerHTML = `
-                            <span class="hanzi">${word.h}</span>
-                            <span class="pinyin">${word.p}</span>
-                        `;
-                    }
-                    pDiv.appendChild(card);
+                    paragraph.forEach((word) => {
+                        const currentId = `word-${wordIdCounter}`;
+                        const currentIndex = wordIdCounter; // 閉包保留當前索引
+                        
+                        // 將單字加入扁平列表，方便後續 slice
+                        flatWordList.push({
+                            id: currentId,
+                            text: word.h,
+                            fullObj: word
+                        });
+
+                        const card = document.createElement('div');
+                        card.id = currentId;
+                        
+                        // 加入點擊事件：點擊即讀
+                        card.onclick = (e) => {
+                            e.stopPropagation(); // 防止觸發其他層
+                            speakText(currentIndex);
+                        };
+
+                        if (word.type === 'punct') {
+                            card.className = 'word-card punctuation';
+                            card.innerHTML = `<span class="hanzi">${word.h}</span>`;
+                        } else if (word.type === 'title') {
+                            card.className = 'word-card';
+                            card.innerHTML = `
+                                <span class="hanzi">${word.h}</span>
+                                <span class="pinyin">${word.p}</span>
+                            `;
+                        } else {
+                            card.className = 'word-card';
+                            card.innerHTML = `
+                                <span class="hanzi">${word.h}</span>
+                                <span class="pinyin">${word.p}</span>
+                            `;
+                        }
+                        pDiv.appendChild(card);
+                        
+                        wordIdCounter++;
+                    });
+
+                    container.appendChild(pDiv);
                 });
-
-                container.appendChild(pDiv);
-            });
+            } catch (error) {
+                console.error("Render Error:", error);
+                document.getElementById('article-container').innerHTML = 
+                    `<div class="p-4 bg-red-100 text-red-700 rounded-lg">
+                        文章載入失敗，請檢查網路或重新整理。<br>
+                        錯誤代碼: ${error.message}
+                    </div>`;
+            }
         }
 
         // --- 3. TTS 語音邏輯與高亮同步 ---
@@ -514,7 +541,6 @@
         const voiceSelect = document.getElementById('voiceSelect');
         const rateInput = document.getElementById('rate');
         const rateValue = document.getElementById('rateValue');
-        let isPlaying = false;
 
         rateInput.oninput = () => rateValue.textContent = rateInput.value;
 
@@ -528,7 +554,7 @@
             if (synth.speaking) {
                 stopSpeaking();
             } else {
-                speakText();
+                speakText(0); // 預設從頭開始
             }
         }
 
@@ -550,7 +576,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
                     </svg>
-                    <span>開始朗讀</span>
+                    <span>從頭開始朗讀</span>
                 `;
             }
         }
@@ -559,11 +585,29 @@
             voices = synth.getVoices();
             voiceSelect.innerHTML = '';
             
-            // 優先篩選 Mandarin (CN, TW, SG)，排除 HK (Cantonese)
-            let mandarinVoices = voices.filter(v => 
-                (v.lang.includes('zh-CN') || v.lang.includes('zh-TW') || v.lang.includes('zh-SG')) &&
-                !v.lang.includes('HK') 
-            );
+            // --- 關鍵修改：更嚴格的普通話篩選邏輯 ---
+            let mandarinVoices = voices.filter(v => {
+                // 必須是中文
+                if (!v.lang.includes('zh')) return false;
+                
+                // 明確排除粵語/香港 (HK, yue, Cantonese, 粵)
+                if (v.lang.includes('HK') || v.lang.includes('yue') || v.name.includes('Cantonese') || v.name.includes('粵')) {
+                    return false;
+                }
+                
+                // 針對 iOS：明確排除 Sin-Ji (這是 iOS 預設的粵語語音)
+                if (v.name.includes('Sin-Ji')) return false;
+
+                return true;
+            });
+
+            // 排序優化：優先顯示 zh-CN (大陸普通話)，其次是 zh-TW (台灣國語)
+            // 因為 zh-CN 在 iOS 上對繁體字的「普通話發音」支援最穩定
+            mandarinVoices.sort((a, b) => {
+                const aCN = a.lang.includes('CN') ? 1 : 0;
+                const bCN = b.lang.includes('CN') ? 1 : 0;
+                return bCN - aCN; // CN 排前面
+            });
 
             // 兜底：如果真的找不到，才放寬條件
             if (mandarinVoices.length === 0) {
@@ -576,16 +620,9 @@
                 option.value = "default";
                 voiceSelect.add(option);
             } else {
-                // 排序優化
-                mandarinVoices.sort((a, b) => {
-                    const priorityNames = ['Google 國語', 'Google Putonghua', 'Microsoft Huihui', 'Ting-Ting', 'Meijia'];
-                    const aScore = priorityNames.some(n => a.name.includes(n)) ? 1 : 0;
-                    const bScore = priorityNames.some(n => b.name.includes(n)) ? 1 : 0;
-                    return bScore - aScore;
-                });
-
                 mandarinVoices.forEach(voice => {
                     const option = document.createElement('option');
+                    // 顯示更清楚的語言標籤
                     option.textContent = `${voice.name} (${voice.lang})`;
                     option.value = voice.name;
                     voiceSelect.appendChild(option);
@@ -602,8 +639,12 @@
             document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
         }
 
-        function speakText() {
-            // iOS Chrome/Safari 語音加載修復：點擊時強制再抓一次
+        /**
+         * 開始朗讀
+         * @param {number} startIndex - 從第幾個字開始讀 (0 為從頭)
+         */
+        function speakText(startIndex = 0) {
+            // iOS Chrome/Safari 語音加載修復
             if (voices.length === 0) {
                 loadVoices();
             }
@@ -616,46 +657,46 @@
             // 自動折疊面板
             document.getElementById('control-panel').classList.add('collapsed');
 
-            // 重新構建 textMapping 
-            let charToDomMap = [];
+            // --- 核心邏輯：從 startIndex 開始重建文本與映射 ---
+            let charToDomMap = []; // 映射：當前朗讀字串的第 N 個字元 -> 對應的 DOM ID
             let combinedText = "";
-            let globalWordCount = 0;
+            
+            // 只需要從點擊的那個字開始
+            const wordsToSpeak = flatWordList.slice(startIndex);
 
-            articleData.forEach(paragraph => {
-                paragraph.forEach(word => {
-                    const text = word.h;
-                    const domId = `word-${globalWordCount}`;
-                    
-                    for (let i = 0; i < text.length; i++) {
-                        charToDomMap.push(domId);
-                    }
-                    combinedText += text;
-                    globalWordCount++;
-                });
-                combinedText += "。"; // 加句號確保語音停頓
-                // 也要為這個句號加一個 map (雖然可能對不到 DOM，但防止 index 出錯)
-                charToDomMap.push(null);
+            wordsToSpeak.forEach(item => {
+                const text = item.text;
+                // 每個字元都對應到同一個 ID
+                for (let i = 0; i < text.length; i++) {
+                    charToDomMap.push(item.id);
+                }
+                combinedText += text;
             });
 
             const utterance = new SpeechSynthesisUtterance(combinedText);
             
-            // 語音選擇邏輯增強
+            // --- 關鍵修復：強制語言設定 ---
             const selectedVoiceName = voiceSelect.value;
-            const selectedVoice = voices.find(v => v.name === selectedVoiceName);
+            let selectedVoice = voices.find(v => v.name === selectedVoiceName);
             
+            // 雙重保險：如果選到的聲音是空的，或者不小心選到了粵語/Sin-Ji，強制切換
+            if (!selectedVoice || selectedVoice.lang.includes('HK') || selectedVoice.name.includes('Cantonese') || selectedVoice.name.includes('Sin-Ji')) {
+                 // 嘗試找一個安全的普通話聲音 (優先 zh-CN)
+                 selectedVoice = voices.find(v => v.lang.includes('CN') && !v.name.includes('Cantonese'));
+                 
+                 // 如果找不到 CN，找 TW
+                 if (!selectedVoice) {
+                    selectedVoice = voices.find(v => v.lang.includes('TW') && !v.name.includes('Cantonese'));
+                 }
+            }
+
             if (selectedVoice) {
                 utterance.voice = selectedVoice;
-                utterance.lang = selectedVoice.lang;
+                // 強制覆蓋 lang 屬性
+                utterance.lang = selectedVoice.lang; 
             } else {
-                // 如果沒有選到（可能選單是空的），強制使用第一個中文語音
-                const fallbackVoice = voices.find(v => v.lang.includes('zh'));
-                if (fallbackVoice) {
-                    utterance.voice = fallbackVoice;
-                    utterance.lang = fallbackVoice.lang;
-                } else {
-                    // 最底層Fallback：只設語言標籤，讓系統自己找
-                    utterance.lang = 'zh-CN'; 
-                }
+                // 最底層 Fallback：強制設為 zh-CN，這是防止 iOS 讀粵語的最後一道防線
+                utterance.lang = 'zh-CN'; 
             }
 
             utterance.rate = rateInput.value;
@@ -689,7 +730,6 @@
             utterance.onend = () => {
                 clearHighlights();
                 updatePlayButton(false);
-                // 播放結束自動展開面板? (可選，這裡保持折疊讓用戶決定)
             };
 
             utterance.onerror = (e) => {
@@ -708,7 +748,8 @@
             updatePlayButton(false);
         }
 
-        renderArticle();
+        // 啟動
+        window.addEventListener('load', renderArticle);
 
     </script>
 </body>
