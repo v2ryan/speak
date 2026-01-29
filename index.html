@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>職場見證 - 拼音閱讀輔助</title>
     <!-- 使用 Tailwind CSS 進行快速排版 -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -10,129 +10,129 @@
         /* 自定義字體與樣式微調 */
         body {
             font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
-            background-color: #f3f4f6;
+            background-color: #f8fafc;
+            /* 防止 iOS 點擊高亮 */
+            -webkit-tap-highlight-color: transparent;
         }
         
-        /* 詞卡樣式 */
+        /* 詞卡樣式 - 手機版更緊湊 */
         .word-card {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             background: white;
-            padding: 0.5rem 0.25rem;
+            padding: 0.35rem 0.2rem; /* 縮小內距 */
             border-radius: 0.5rem;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             transition: all 0.2s;
-            min-width: 2.5rem; /* 確保最小寬度 */
-            scroll-margin-top: 100px; /* 讓自動捲動時保留頂部空間 */
-        }
-
-        .word-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-bottom: 2px solid #3b82f6;
+            min-width: 2.2rem;
+            scroll-margin-top: 150px; /* 增加捲動保留空間，避免被標題遮擋 */
         }
 
         /* 標題樣式特別處理 */
         .is-title .hanzi {
-            font-size: 1.8rem;
-            color: #1e3a8a; /* 深藍色 */
+            font-size: 1.6rem;
+            color: #1e3a8a;
         }
 
-        /* 正在朗讀的高亮樣式 - 加強版 */
+        /* 正在朗讀的高亮樣式 */
         .highlight {
-            background-color: #bfdbfe !important; /* 更明顯的藍色背景 */
-            transform: scale(1.1);
+            background-color: #bfdbfe !important;
+            transform: scale(1.05);
             z-index: 10;
             border: 2px solid #2563eb;
-            box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
 
         .hanzi {
-            font-size: 1.5rem;
+            font-size: 1.4rem; /* 手機版字體微調 */
             font-weight: 600;
             color: #1f2937;
-            line-height: 1.2;
+            line-height: 1.1;
         }
 
         .pinyin {
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             color: #6b7280;
-            font-family: "Arial", sans-serif; /* 拼音用無襯線體更清晰 */
+            font-family: "Arial", sans-serif;
             margin-top: 0.1rem;
         }
 
-        /* 標點符號樣式 */
+        /* 標點符號 */
         .punctuation {
             background: transparent;
             box-shadow: none;
             min-width: auto;
-            padding-bottom: 1rem; /* 調整標點位置 */
+            padding-bottom: 0.8rem;
         }
         
         .punctuation .hanzi {
             color: #9ca3af;
         }
+
+        /* --- 沈浸閱讀模式樣式 --- */
+        /* 當 body 有 .reading-mode 時，隱藏非必要元素 */
+        body.reading-mode #settings-container {
+            display: none;
+        }
+        body.reading-mode #control-header {
+            display: none;
+        }
+        body.reading-mode #play-btn-wrapper {
+            display: none;
+        }
+        body.reading-mode #stop-btn-wrapper {
+            display: block;
+            width: 100%;
+        }
+        /* 讓側邊欄在閱讀模式下變矮 */
+        body.reading-mode aside {
+            flex: 0 0 auto;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
     </style>
 </head>
-<body class="h-screen flex flex-col md:flex-row overflow-hidden">
+<body class="h-screen flex flex-col md:flex-row overflow-hidden transition-all duration-300">
 
     <!-- 左側：文章內容區 (可滾動) -->
-    <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth" id="content-area">
-        <div class="max-w-4xl mx-auto">
-            <div id="article-header" class="text-center mb-8">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 leading-relaxed">
-                    從「混日子」到「神眼中的唯一」<br>
-                    <span class="text-xl text-blue-600">—— 一位職場青年的生命翻轉</span>
+    <main class="flex-1 overflow-y-auto p-3 md:p-8 scroll-smooth" id="content-area">
+        <div class="max-w-4xl mx-auto pb-4">
+            <div id="article-header" class="text-center mb-6 mt-2">
+                <h1 class="text-xl md:text-3xl font-bold text-gray-800 leading-relaxed">
+                    從「混日子」到<br>「神眼中的唯一」<br>
+                    <span class="text-base md:text-xl text-blue-600 block mt-2">—— 一位職場青年的生命翻轉</span>
                 </h1>
             </div>
             
-            <div id="article-container" class="space-y-8 pb-32">
+            <!-- 增加底部 padding，確保最後一段不被浮動按鈕遮擋 -->
+            <div id="article-container" class="space-y-6 pb-48 md:pb-32">
                 <!-- 內容將由 JavaScript 動態生成 -->
             </div>
         </div>
     </main>
 
-    <!-- 右側：控制面板 (固定) -->
-    <aside class="w-full md:w-80 bg-white border-l border-gray-200 shadow-lg flex flex-col z-10">
-        <div class="p-6 bg-blue-600 text-white">
-            <h2 class="text-xl font-bold flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <!-- 右側：控制面板 (手機版在底部) -->
+    <aside class="w-full md:w-80 bg-white border-t md:border-t-0 md:border-l border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-20 transition-all duration-300 flex flex-col">
+        
+        <!-- 1. 標題區 (閱讀模式時隱藏) -->
+        <div id="control-header" class="p-4 bg-blue-600 text-white transition-all">
+            <h2 class="text-lg font-bold flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
                 語音控制
             </h2>
-            <p class="text-blue-100 text-sm mt-1">即時高亮閱讀中...</p>
         </div>
 
-        <div class="flex-1 p-6 space-y-6 overflow-y-auto">
-            
-            <!-- 播放控制 -->
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="speakText()" id="playBtn" class="bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition font-bold shadow-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
-                    </svg>
-                    朗讀
-                </button>
-                <button onclick="stopSpeaking()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition font-bold">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" />
-                    </svg>
-                    停止
-                </button>
-            </div>
-
-            <hr class="border-gray-100">
-
-            <!-- 聲音選擇 -->
-            <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">選擇聲音</label>
-                <select id="voiceSelect" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm">
-                    <option value="">載入中...</option>
+        <!-- 2. 設定區 (閱讀模式時隱藏) -->
+        <div id="settings-container" class="flex-1 p-4 overflow-y-auto md:max-h-none max-h-[40vh] space-y-5 transition-all">
+             <!-- 聲音選擇 -->
+             <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">選擇聲音 (Mandarin Only)</label>
+                <select id="voiceSelect" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-gray-50">
+                    <option value="">正在尋找普通話語音...</option>
                 </select>
-                <p class="text-xs text-gray-500 mt-1">* 建議使用 Google 國語或 Microsoft Huihui 以獲得最佳體驗。</p>
             </div>
 
             <!-- 語速控制 -->
@@ -144,29 +144,45 @@
                 <input type="range" id="rate" min="0.5" max="1.5" value="1" step="0.1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
             </div>
 
-            <!-- 開關高亮功能 (可選) -->
+            <!-- 開關高亮 -->
             <div class="flex items-center justify-between">
-                <label class="text-sm font-medium text-gray-700">跟隨捲動</label>
-                <input type="checkbox" id="autoScroll" checked class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                <label class="text-sm font-medium text-gray-700">自動捲動跟隨</label>
+                <input type="checkbox" id="autoScroll" checked class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
             </div>
 
-            <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 mt-4">
-                <h4 class="text-sm font-bold text-yellow-800 mb-1">使用說明</h4>
-                <ul class="text-xs text-yellow-700 list-disc list-inside space-y-1">
-                    <li>現在會自動高亮正在朗讀的單字。</li>
-                    <li>若聲音斷續，請嘗試調整語速或更換語音引擎。</li>
-                </ul>
+            <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                <p class="text-xs text-yellow-800">
+                    * 點擊「朗讀」後，面板會自動收起以顯示更多內容。
+                </p>
             </div>
         </div>
 
-        <div class="p-4 bg-gray-50 text-center text-xs text-gray-400 border-t">
-            LDS Testimony Reader v2.0
+        <!-- 3. 按鈕區 (固定在最底部) -->
+        <div class="p-4 bg-gray-50 border-t border-gray-100 pb-safe">
+            <!-- 播放按鈕 (閱讀模式隱藏) -->
+            <div id="play-btn-wrapper">
+                <button onclick="speakText()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition font-bold shadow-lg text-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                    </svg>
+                    開始朗讀
+                </button>
+            </div>
+
+            <!-- 停止按鈕 (預設隱藏，閱讀模式顯示) -->
+            <div id="stop-btn-wrapper" style="display: none;">
+                <button onclick="stopSpeaking()" class="w-full bg-red-500 hover:bg-red-600 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition font-bold shadow-lg text-lg animate-pulse">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" />
+                    </svg>
+                    停止播放
+                </button>
+            </div>
         </div>
     </aside>
 
     <script>
         // --- 1. 資料準備：新文章 ---
-        // 為了確保精準度，這裡將文章結構化存儲
         const articleData = [
             // 第一段：去年九月開始...
             [
@@ -438,8 +454,8 @@
         ];
 
         // --- 2. 渲染邏輯 ---
-        let wordIdCounter = 0; // 全局計數器，為每個詞卡分配唯一 ID
-        const textMapping = []; // 索引映射：Char Index -> Word ID
+        let wordIdCounter = 0; // 全局計數器
+        const textMapping = []; 
 
         function renderArticle() {
             const container = document.getElementById('article-container');
@@ -450,10 +466,9 @@
                 const pDiv = document.createElement('div');
                 pDiv.className = 'flex flex-wrap gap-2 items-end'; 
                 
-                // 檢查是否為標題段落 (簡單判斷：如果有 word.type === 'title')
                 const isTitle = paragraph.some(w => w.type === 'title');
                 if (isTitle) {
-                    pDiv.className += ' mb-4 mt-6 border-b-2 border-blue-100 pb-2 is-title';
+                    pDiv.className += ' mb-4 mt-6 border-b-2 border-blue-100 pb-2 is-title justify-center';
                 }
 
                 paragraph.forEach((word) => {
@@ -461,8 +476,6 @@
                     const currentId = `word-${wordIdCounter}`;
                     card.id = currentId;
                     
-                    // 根據字數建立映射
-                    // 例如 "見證" (2字)，這兩個字的 Char Index 都會指向同一個 Card ID
                     const len = word.h.length;
                     for(let i=0; i<len; i++) {
                         textMapping.push(currentId);
@@ -506,23 +519,33 @@
             voices = synth.getVoices();
             voiceSelect.innerHTML = '';
             
-            const zhVoices = voices.filter(v => v.lang.includes('zh') || v.lang.includes('CN') || v.lang.includes('TW') || v.lang.includes('HK'));
+            // 優先篩選 Mandarin (CN, TW, SG)，排除 HK (Cantonese)
+            let mandarinVoices = voices.filter(v => 
+                (v.lang.includes('zh-CN') || v.lang.includes('zh-TW') || v.lang.includes('zh-SG')) &&
+                !v.lang.includes('HK') 
+            );
+
+            // 兜底：如果真的找不到，才放寬條件
+            if (mandarinVoices.length === 0) {
+                 mandarinVoices = voices.filter(v => v.lang.includes('zh'));
+            }
             
-            if (zhVoices.length === 0) {
+            if (mandarinVoices.length === 0) {
                 const option = document.createElement('option');
-                option.text = "未偵測到中文語音，將使用預設";
+                option.text = "未偵測到普通話語音";
                 voiceSelect.add(option);
                 return;
             }
 
-            zhVoices.sort((a, b) => {
+            // 排序優化
+            mandarinVoices.sort((a, b) => {
                 const priorityNames = ['Google 國語', 'Google Putonghua', 'Microsoft Huihui', 'Ting-Ting', 'Meijia'];
                 const aScore = priorityNames.some(n => a.name.includes(n)) ? 1 : 0;
                 const bScore = priorityNames.some(n => b.name.includes(n)) ? 1 : 0;
                 return bScore - aScore;
             });
 
-            zhVoices.forEach(voice => {
+            mandarinVoices.forEach(voice => {
                 const option = document.createElement('option');
                 option.textContent = `${voice.name} (${voice.lang})`;
                 option.value = voice.name;
@@ -545,31 +568,10 @@
             }
             clearHighlights();
 
-            // 重新構建 textMapping (每次播放前確保映射正確)
-            // 必須清空並重新對應
-            const tempMapping = [];
-            let fullText = "";
+            // 啟動閱讀模式 (隱藏 UI)
+            document.body.classList.add('reading-mode');
 
-            articleData.forEach(paragraph => {
-                paragraph.forEach((word, wIndex) => {
-                    const wordText = word.h;
-                    fullText += wordText;
-                    
-                    // 這裡的邏輯必須和 renderArticle 完全一致
-                    // 我們需要計算全域的 word index
-                    // 簡單的方法：使用全局計數器重建映射
-                });
-                // 段落之間通常會有隱藏的換行符，但瀏覽器 TTS 處理換行符的索引方式不一
-                // 為了最穩定的邊界檢測，我們將所有段落合併成一個長字串播放
-                // 但要加入適當的停頓符號
-                fullText += "。"; // 段落間強制停頓
-            });
-            
-            // 由於 map 邏輯複雜，我們採取 "Event-Driven" 的高亮方式
-            // 直接產生純文字給 TTS，同時計算每個字的 offset
-            
-            // 改良版映射邏輯：
-            // 我們產生一個超級長字串，並記錄每個字元對應的 DOM ID
+            // 重新構建 textMapping 
             let charToDomMap = [];
             let combinedText = "";
             let globalWordCount = 0;
@@ -585,8 +587,7 @@
                     combinedText += text;
                     globalWordCount++;
                 });
-                // 處理段落間隔，增加一個虛擬字符以免索引錯位 (部分引擎會忽略標點，這部分較 tricky)
-                // 為了最簡單的實現，我們不手動加換行，直接依賴標點符號停頓
+                fullText = combinedText + "。"; 
             });
 
             const utterance = new SpeechSynthesisUtterance(combinedText);
@@ -594,30 +595,19 @@
             const selectedVoiceName = voiceSelect.value;
             const selectedVoice = voices.find(v => v.name === selectedVoiceName);
             if (selectedVoice) utterance.voice = selectedVoice;
-            else {
-                const fallbackVoice = voices.find(v => v.lang.includes('zh'));
-                if (fallbackVoice) utterance.voice = fallbackVoice;
-            }
 
             utterance.rate = rateInput.value;
             
-            // --- 核心高亮邏輯 ---
             utterance.onboundary = (event) => {
                 if (event.name === 'word' || event.name === 'sentence') {
                     const charIndex = event.charIndex;
-                    
-                    // 查找對應的 DOM ID
                     if (charIndex < charToDomMap.length) {
                         const targetId = charToDomMap[charIndex];
                         const targetEl = document.getElementById(targetId);
                         
                         if (targetEl) {
-                            // 移除舊的高亮
                             clearHighlights();
-                            // 新增高亮
                             targetEl.classList.add('highlight');
-                            
-                            // 自動捲動
                             if (document.getElementById('autoScroll').checked) {
                                 targetEl.scrollIntoView({
                                     behavior: 'smooth',
@@ -629,18 +619,15 @@
                 }
             };
 
-            utterance.onstart = () => {
-                document.getElementById('playBtn').innerHTML = '播放中...';
-                document.getElementById('playBtn').classList.add('bg-blue-800');
+            utterance.onend = () => {
+                clearHighlights();
+                // 結束閱讀模式 (恢復 UI)
+                document.body.classList.remove('reading-mode');
             };
 
-            utterance.onend = () => {
-                document.getElementById('playBtn').innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
-                    </svg> 朗讀`;
-                document.getElementById('playBtn').classList.remove('bg-blue-800');
-                clearHighlights();
+            // 錯誤處理：確保 UI 恢復
+            utterance.onerror = () => {
+                document.body.classList.remove('reading-mode');
             };
 
             synth.speak(utterance);
@@ -651,6 +638,8 @@
                 synth.cancel();
             }
             clearHighlights();
+            // 恢復 UI
+            document.body.classList.remove('reading-mode');
         }
 
         renderArticle();
