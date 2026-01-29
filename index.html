@@ -142,20 +142,27 @@
                 </svg>
                 語音控制
             </h2>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 chevron transition-transform duration-300 md:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
+            <div class="flex items-center gap-2">
+                <span id="voice-count-badge" class="text-xs bg-blue-500 px-2 py-0.5 rounded-full hidden">0</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 chevron transition-transform duration-300 md:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
         </div>
 
         <!-- 設定區 -->
         <div id="settings-container" class="flex-1 p-4 overflow-y-auto space-y-5 bg-white">
              <!-- 聲音選擇 -->
              <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">選擇聲音 (Mandarin)</label>
+                <label class="block text-sm font-medium text-gray-700">選擇聲音 (Mandarin / Guoyu)</label>
                 <select id="voiceSelect" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-gray-50">
                     <option value="">正在載入語音...</option>
                 </select>
-                <p class="text-xs text-gray-500 mt-1">若仍讀粵語，請選擇上方帶有「🌟」的強制選項。</p>
+                <div class="flex gap-2 mt-1">
+                    <button onclick="loadVoices()" class="text-xs text-blue-600 hover:text-blue-800 underline">
+                        找不到聲音？點此重新整理
+                    </button>
+                </div>
             </div>
 
             <!-- 語速控制 -->
@@ -174,8 +181,8 @@
 
             <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3">
                 <p class="text-xs text-yellow-800">
-                    * 點擊文章單字即可從該處播放。<br>
-                    * 若手機仍講廣東話，請在清單中選取帶有 (zh-CN) 的聲音。
+                    * 推薦選擇帶有 🇹🇼 (台灣) 或 🇨🇳 (大陸) 的聲音。<br>
+                    * "Mei-Jia" 為台灣國語，"Ting-Ting" 為大陸普通話。
                 </p>
             </div>
         </div>
@@ -542,6 +549,7 @@
         const voiceSelect = document.getElementById('voiceSelect');
         const rateInput = document.getElementById('rate');
         const rateValue = document.getElementById('rateValue');
+        const voiceCountBadge = document.getElementById('voice-count-badge');
 
         rateInput.oninput = () => rateValue.textContent = rateInput.value;
 
@@ -586,35 +594,35 @@
             voices = synth.getVoices();
             voiceSelect.innerHTML = '';
             
-            // --- 關鍵修改：更嚴格的普通話篩選邏輯 ---
+            // 擴大篩選範圍：包含所有中文變體 (CN, TW, SG, HK-check)
+            // 但嚴格排除粵語特徵
             let mandarinVoices = voices.filter(v => {
-                // 必須是中文
-                if (!v.lang.includes('zh')) return false;
+                // 基礎檢查：必須包含 zh
+                if (!v.lang.toLowerCase().includes('zh')) return false;
                 
-                // 明確排除粵語/香港 (HK, yue, Cantonese, 粵)
-                if (v.lang.includes('HK') || v.lang.includes('yue') || v.name.includes('Cantonese') || v.name.includes('粵')) {
+                const lang = v.lang.toLowerCase();
+                const name = v.name.toLowerCase();
+
+                // 排除粵語特徵
+                if (lang.includes('hk') || lang.includes('yue') || name.includes('cantonese') || name.includes('粵')) {
                     return false;
                 }
                 
-                // 針對 iOS：明確排除 Sin-Ji (這是 iOS 預設的粵語語音)
-                if (v.name.includes('Sin-Ji')) return false;
+                // 排除 iOS 特定粵語語音
+                if (name.includes('sin-ji')) return false;
 
+                // 包含 CN, TW, SG, 或純 zh
                 return true;
             });
 
-            // 排序優化：優先顯示 zh-CN (大陸普通話)，其次是 zh-TW (台灣國語)
-            // 因為 zh-CN 在 iOS 上對繁體字的「普通話發音」支援最穩定
+            // 排序優化：優先顯示常見的高品質語音
             mandarinVoices.sort((a, b) => {
-                const aCN = a.lang.includes('CN') ? 1 : 0;
-                const bCN = b.lang.includes('CN') ? 1 : 0;
-                return bCN - aCN; // CN 排前面
+                // 優先 CN 和 TW
+                const aScore = (a.lang.includes('CN') || a.lang.includes('TW')) ? 1 : 0;
+                const bScore = (b.lang.includes('CN') || b.lang.includes('TW')) ? 1 : 0;
+                return bScore - aScore;
             });
 
-            // 兜底：如果真的找不到，才放寬條件
-            if (mandarinVoices.length === 0) {
-                 mandarinVoices = voices.filter(v => v.lang.includes('zh'));
-            }
-            
             if (mandarinVoices.length === 0) {
                 const option = document.createElement('option');
                 option.text = "未偵測到普通話語音 (將使用系統預設)";
@@ -623,11 +631,23 @@
             } else {
                 mandarinVoices.forEach(voice => {
                     const option = document.createElement('option');
-                    // 顯示更清楚的語言標籤
-                    option.textContent = `${voice.name} (${voice.lang})`;
+                    
+                    // 加上地區旗幟或標示，讓用戶好分辨
+                    let regionPrefix = "🌐";
+                    if (voice.lang.includes('CN')) regionPrefix = "🇨🇳 (大陸)";
+                    else if (voice.lang.includes('TW')) regionPrefix = "🇹🇼 (台灣)";
+                    else if (voice.lang.includes('SG')) regionPrefix = "🇸🇬 (新加坡)";
+                    
+                    option.textContent = `${regionPrefix} ${voice.name}`;
                     option.value = voice.name;
                     voiceSelect.appendChild(option);
                 });
+            }
+            
+            // 更新計數器 (Debug用)
+            if (voiceCountBadge) {
+                voiceCountBadge.innerText = mandarinVoices.length;
+                voiceCountBadge.classList.remove('hidden');
             }
         }
 
@@ -676,27 +696,25 @@
 
             const utterance = new SpeechSynthesisUtterance(combinedText);
             
-            // --- 關鍵修復：強制語言設定 ---
+            // --- 關鍵修復：動態語言設定 ---
             const selectedVoiceName = voiceSelect.value;
             let selectedVoice = voices.find(v => v.name === selectedVoiceName);
             
-            // 雙重保險：如果選到的聲音是空的，或者不小心選到了粵語/Sin-Ji，強制切換
-            if (!selectedVoice || selectedVoice.lang.includes('HK') || selectedVoice.name.includes('Cantonese') || selectedVoice.name.includes('Sin-Ji')) {
-                 // 嘗試找一個安全的普通話聲音 (優先 zh-CN)
-                 selectedVoice = voices.find(v => v.lang.includes('CN') && !v.name.includes('Cantonese'));
-                 
-                 // 如果找不到 CN，找 TW
-                 if (!selectedVoice) {
-                    selectedVoice = voices.find(v => v.lang.includes('TW') && !v.name.includes('Cantonese'));
-                 }
+            // 如果沒選，嘗試找一個合理的預設值
+            if (!selectedVoice) {
+                 // 優先找 Meijia (TW) 或 Ting-Ting (CN)
+                 selectedVoice = voices.find(v => v.name.includes('Meijia')) || 
+                                 voices.find(v => v.name.includes('Ting-Ting')) ||
+                                 voices.find(v => (v.lang.includes('CN') || v.lang.includes('TW')) && !v.name.includes('Cantonese'));
             }
 
             if (selectedVoice) {
                 utterance.voice = selectedVoice;
-                // 強制覆蓋 lang 屬性
+                // [CRITICAL FIX] 不要強制寫死 zh-CN，而是使用該語音原本的 lang 屬性
+                // 這樣 iOS 才知道 "Meijia" 是 zh-TW，"Ting-Ting" 是 zh-CN，而不會混淆
                 utterance.lang = selectedVoice.lang; 
             } else {
-                // 最底層 Fallback：強制設為 zh-CN，這是防止 iOS 讀粵語的最後一道防線
+                // 真的找不到時，才 fallback 到 zh-CN
                 utterance.lang = 'zh-CN'; 
             }
 
